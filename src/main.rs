@@ -1,3 +1,6 @@
+mod get_focused_window_id;
+
 fn main() {
-    println!("Hello, world!");
+    let init_focused_window_id = get_focused_window_id::get_focused_window_id().unwrap();
+    println!("{}", init_focused_window_id);
 }
