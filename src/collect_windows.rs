@@ -60,6 +60,7 @@ pub fn collect_windows() -> Result<Tabs, Box<dyn std::error::Error>> {
                 String::from(tab_title),
                 String::from(window_title),
                 Some(window_id as u8),
+                None,
             ));
         }
     }
