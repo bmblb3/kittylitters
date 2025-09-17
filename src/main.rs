@@ -7,4 +7,6 @@ fn main() {
     if !colleted_windows.verify() {
         panic!("Exisiting tab-window names are not unique!")
     };
+    println!("Existing windows: {:?}", colleted_windows.0);
+    println!("Focused window ID: {}", init_focused_window_id);
 }
