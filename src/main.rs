@@ -1,6 +1,7 @@
 use kittylitters::collect_windows::collect_windows;
 use kittylitters::get_focused_window_id::get_focused_window_id;
 use kittylitters::read_yml::read_sess_yml;
+use kittylitters::remove_windows::remove_windows;
 
 fn main() {
     let colleted_windows = collect_windows().unwrap();
@@ -23,4 +24,6 @@ fn main() {
 
     let to_remove = colleted_windows.sub(&desired_tabs);
     println!("\nTo remove: {:?}", to_remove.0);
+
+    remove_windows(to_remove);
 }
