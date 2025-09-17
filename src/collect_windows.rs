@@ -51,7 +51,9 @@ pub fn collect_windows() -> Result<Tabs, Box<dyn std::error::Error>> {
                 .ok_or("Window does not contain `id`")?
                 .as_u64()
                 .ok_or("Window id could not be converted to u64")?;
-            let (tab_title, window_title) = title.split_once("/").ok_or("")?;
+            let (tab_title, window_title) = title
+                .split_once("/")
+                .ok_or("window is not of the form T/W")?;
             res_vec.push((
                 String::from(tab_title),
                 String::from(window_title),
