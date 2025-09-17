@@ -36,17 +36,12 @@ pub fn collect_windows() -> Result<Tabs, Box<dyn std::error::Error>> {
     let mut res_vec = Vec::new();
 
     for tab in tabs_array {
-        let tab_title = tab
-            .get("title")
-            .ok_or("Tab does not contain `title`")?
-            .as_str()
-            .ok_or("Tab title could not be converted to string")?;
         let windows = tab.get("windows").ok_or("Tab does not contain `windows`")?;
         let windows_array = windows
             .as_array()
             .ok_or("Windows could not be converted to array")?;
         for window in windows_array {
-            let window_title = window
+            let title = window
                 .get("title")
                 .ok_or("Window does not contain `title`")?
                 .as_str()
@@ -56,6 +51,7 @@ pub fn collect_windows() -> Result<Tabs, Box<dyn std::error::Error>> {
                 .ok_or("Window does not contain `id`")?
                 .as_u64()
                 .ok_or("Window id could not be converted to u64")?;
+            let (tab_title, window_title) = title.split_once("/").ok_or("")?;
             res_vec.push((
                 String::from(tab_title),
                 String::from(window_title),
