@@ -1,8 +1,8 @@
 use std::process::Command;
 
-use crate::collections::Tabs;
+use crate::collections::Windows;
 
-pub fn remove_windows(tabs: Tabs) {
+pub fn remove_windows(tabs: Windows) {
     for (_, _, winid, _) in tabs.0 {
         Command::new("kitten")
             .args([

@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
-pub struct Tabs(pub Vec<(String, String, Option<u8>, Option<String>)>);
+pub struct Windows(pub Vec<(String, String, Option<u8>, Option<String>)>);
 
-impl Tabs {
+impl Windows {
     pub fn verify(&self) -> bool {
         let mut flatvec = Vec::new();
         for (tab_title, window_title, _, _) in &self.0 {
@@ -32,6 +32,6 @@ impl Tabs {
                 ));
             }
         }
-        Tabs(result_vec)
+        Windows(result_vec)
     }
 }
