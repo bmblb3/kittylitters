@@ -4,6 +4,8 @@ use std::hash::Hasher;
 
 use std::hash::Hash;
 
+use indexmap::IndexMap;
+
 #[derive(Debug, Clone)]
 pub struct Window {
     pub title: String,
@@ -48,5 +50,41 @@ impl Window {
     pub fn with_cmd(mut self, cmd: impl Into<Option<String>>) -> Self {
         self.cmd = cmd.into();
         self
+    }
+
+    pub fn from_titles(windows: &IndexMap<String, Vec<String>>) -> Vec<Self> {
+        windows
+            .iter()
+            .flat_map(|(tab_title, window_titles)| {
+                window_titles
+                    .iter()
+                    .map(|window_title| Window::new(format!("{0}/{1}", tab_title, window_title)))
+                    .collect::<Vec<Window>>()
+            })
+            .collect()
+    }
+
+    pub fn from_instructions(
+        windows: &IndexMap<String, Vec<IndexMap<String, Option<String>>>>,
+    ) -> Vec<Self> {
+        windows
+            .iter()
+            .flat_map(|(tab_title, window_instructions)| {
+                window_instructions
+                    .iter()
+                    .map(|window_instruction| {
+                        let window_title = window_instruction
+                            .get("title")
+                            .and_then(|x| x.as_ref())
+                            .expect("Window instruction should have 'title'");
+                        let window_cwd = window_instruction.get("cwd").and_then(|x| x.as_ref());
+                        let window_cmd = window_instruction.get("cmd").and_then(|x| x.as_ref());
+                        Window::new(format!("{0}/{1}", tab_title, window_title))
+                            .with_cwd(window_cwd.map(|s| s.to_owned()))
+                            .with_cmd(window_cmd.map(|s| s.to_owned()))
+                    })
+                    .collect::<Vec<Window>>()
+            })
+            .collect()
     }
 }
