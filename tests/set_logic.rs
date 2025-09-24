@@ -2,145 +2,145 @@ use kittylitters::set_logic::{Operation, Solver};
 
 #[rstest::rstest]
 #[case(
-    vec!["A"],
-    vec!["A"],
+    vec!["X/a"],
+    vec!["X/a"],
     vec![]
 )]
 #[case(
-    vec!["A", "B"],
-    vec!["A", "B"],
+    vec!["X/a", "X/b"],
+    vec!["X/a", "X/b"],
     vec![]
 )]
 #[case(
-    vec!["A", "B"],
-    vec!["B", "A"],
+    vec!["X/a", "X/b"],
+    vec!["X/b", "X/a"],
     vec![
-        Operation::GoTo(&"A"),
+        Operation::GoTo(&"X/a"),
         Operation::MoveForward(1),
     ]
 )]
 #[case(
-    vec!["A", "B"],
-    vec!["A"],
+    vec!["X/a", "X/b"],
+    vec!["X/a"],
     vec![
-        Operation::GoTo(&"B"),
+        Operation::GoTo(&"X/b"),
         Operation::Close
     ]
 )]
 #[case(
-    vec!["A", "B"],
-    vec!["B"],
+    vec!["X/a", "X/b"],
+    vec!["X/b"],
     vec![
-        Operation::GoTo(&"A"),
+        Operation::GoTo(&"X/a"),
         Operation::Close
     ]
 )]
 #[case(
-    vec!["A"],
-    vec!["A", "B"],
+    vec!["X/a"],
+    vec!["X/a", "X/b"],
     vec![
-        Operation::GoTo(&"A"),
-        Operation::New(&"B"),
+        Operation::GoTo(&"X/a"),
+        Operation::New(&"X/b"),
     ]
 )]
 #[case(
-    vec!["A", "B", "C"],
-    vec!["A", "C"],
+    vec!["X/a", "X/b", "X/c"],
+    vec!["X/a", "X/c"],
     vec![
-        Operation::GoTo(&"B"),
+        Operation::GoTo(&"X/b"),
         Operation::Close
     ]
 )]
 #[case(
-    vec!["A"],
-    vec!["B"],
+    vec!["X/a"],
+    vec!["X/b"],
     vec![
-        Operation::GoTo(&"A"),
-        Operation::New(&"B"),
-        Operation::GoTo(&"A"),
+        Operation::GoTo(&"X/a"),
+        Operation::New(&"X/b"),
+        Operation::GoTo(&"X/a"),
         Operation::Close,
     ]
 )]
 #[case(
-    vec!["A", "B", "C"],
-    vec!["A", "B"],
+    vec!["X/a", "X/b", "X/c"],
+    vec!["X/a", "X/b"],
     vec![
-        Operation::GoTo(&"C"),
+        Operation::GoTo(&"X/c"),
         Operation::Close,
     ]
 )]
 #[case(
-    vec!["A", "B", "C"],
-    vec!["A", "C", "B"],
+    vec!["X/a", "X/b", "X/c"],
+    vec!["X/a", "X/c", "X/b"],
     vec![
-        Operation::GoTo(&"B"),     // vec!["A", [B], "C"]
-        Operation::MoveForward(1), // vec!["A", "C", [B]]
+        Operation::GoTo(&"X/b"),   // vec!["X/a", [X/b], "X/c"]
+        Operation::MoveForward(1), // vec!["X/a", "X/c", [X/b]]
     ]
 )]
 #[case(
-    vec!["A", "B", "C"],
-    vec!["B", "A", "C"],
+    vec!["X/a", "X/b", "X/c"],
+    vec!["X/b", "X/a", "X/c"],
     vec![
-        Operation::GoTo(&"A"),     // vec![[A], "B", "C"]
-        Operation::MoveForward(1), // vec!["B", [A], "C"]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/b", "X/c"]
+        Operation::MoveForward(1), // vec!["X/b", [X/a], "X/c"]
     ]
 )]
 #[case(
-    vec!["A", "B", "C"],
-    vec!["B", "C", "A"],
+    vec!["X/a", "X/b", "X/c"],
+    vec!["X/b", "X/c", "X/a"],
     vec![
-        Operation::GoTo(&"A"),     // vec![[A], "B", "C"]
-        Operation::MoveForward(2), // vec!["B", [A], "C"]
-                                   // vec!["B", "C", [A]]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/b", "X/c"]
+        Operation::MoveForward(2), // vec!["X/b", [X/a], "X/c"]
+                                   // vec!["X/b", "X/c", [X/a]]
     ]
 )]
 #[case(
-    vec!["A", "B", "C"],
-    vec!["C", "B", "A"],
+    vec!["X/a", "X/b", "X/c"],
+    vec!["X/c", "X/b", "X/a"],
     vec![
-        Operation::GoTo(&"A"),     // vec![[A], "B", "C"]
-        Operation::MoveForward(2), // vec!["B", [A], "C"]
-                                   // vec!["B", "C", [A]]
-        Operation::GoTo(&"B"),     // vec![[B], "C", "A"]
-        Operation::MoveForward(1), // vec!["C", [B], "A"]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/b", "X/c"]
+        Operation::MoveForward(2), // vec!["X/b", [X/a], "X/c"]
+                                   // vec!["X/b", "X/c", [X/a]]
+        Operation::GoTo(&"X/b"),   // vec![[X/b], "X/c", "X/a"]
+        Operation::MoveForward(1), // vec!["X/c", [X/b], "X/a"]
     ]
 )]
 #[case(
-    vec!["A", "B", "C"],
-    vec!["C", "A", "B"],
+    vec!["X/a", "X/b", "X/c"],
+    vec!["X/c", "X/a", "X/b"],
     vec![
-        Operation::GoTo(&"A"),     // vec![[A], "B", "C"]
-        Operation::MoveForward(1), // vec!["B", [A], "C"]
-        Operation::GoTo(&"B"),     // vec![[B], "A", "C"]
-        Operation::MoveForward(2), // vec!["A", [B], "C"]
-                                   // vec!["A", "C", [B]]
-        Operation::GoTo(&"A"),     // vec![[A], "C", "B"]
-        Operation::MoveForward(1), // vec!["C", [A], "B"]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/b", "X/c"]
+        Operation::MoveForward(1), // vec!["X/b", [X/a], "X/c"]
+        Operation::GoTo(&"X/b"),   // vec![[X/b], "X/a", "X/c"]
+        Operation::MoveForward(2), // vec!["X/a", [X/b], "X/c"]
+                                   // vec!["X/a", "X/c", [X/b]]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/c", "X/b"]
+        Operation::MoveForward(1), // vec!["X/c", [X/a], "X/b"]
 
     ]
 )]
 #[case(
-    vec!["A", "B"],
-    vec!["C", "A"],
+    vec!["X/a", "X/b"],
+    vec!["X/c", "X/a"],
     vec![
-        Operation::GoTo(&"A"),     // vec![[A], "B"]
-        Operation::New(&"C"),      // vec!["A", [C], "B"]
-        Operation::GoTo(&"A"),     // vec![[A], "C", "B"]
-        Operation::MoveForward(1), // vec!["C", [A], "B"]
-        Operation::GoTo(&"B"),     // vec!["C", "A", [B]]
-        Operation::Close           // vec!["C", "A"]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/b"]
+        Operation::New(&"X/c"),    // vec!["X/a", [X/c], "X/b"]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/c", "X/b"]
+        Operation::MoveForward(1), // vec!["X/c", [X/a], "X/b"]
+        Operation::GoTo(&"X/b"),   // vec!["X/c", "X/a", [X/b]]
+        Operation::Close           // vec!["X/c", "X/a"]
     ]
 )]
 #[case(
-    vec!["A", "B", "C"],
-    vec!["D", "A", "B"],
+    vec!["X/a", "X/b", "X/c"],
+    vec!["X/d", "X/a", "X/b"],
     vec![
-        Operation::GoTo(&"A"),     // vec![[A], "B", "C"]
-        Operation::New(&"D"),      // vec!["A", [D], "B", "C"]
-        Operation::GoTo(&"A"),     // vec![[A], "D", "B", "C"]
-        Operation::MoveForward(1), // vec!["D", [A], "B", "C"]
-        Operation::GoTo(&"C"),     // vec!["D", "A", "B", [C]]
-        Operation::Close           // vec!["D", "A", "B"]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/b", "X/c"]
+        Operation::New(&"X/d"),    // vec!["X/a", [X/d], "X/b", "X/c"]
+        Operation::GoTo(&"X/a"),   // vec![[X/a], "X/d", "X/b", "X/c"]
+        Operation::MoveForward(1), // vec!["X/d", [X/a], "X/b", "X/c"]
+        Operation::GoTo(&"X/c"),   // vec!["X/d", "X/a", "X/b", [X/c]]
+        Operation::Close           // vec!["X/d", "X/a", "X/b"]
     ]
 )]
 fn test_cases(
