@@ -146,6 +146,14 @@ use kittylitters::{
         Operation::CloseWindow           // vec!["X/d", "X/a", "X/b"]
     ]
 )]
+#[case(
+    vec!["X/a"],
+    vec!["X/a", "Y/a"],
+    vec![
+        Operation::GoTo("X/a"),          // vec![[X/a]]
+        Operation::NewTab("Y/a"),        // vec!["X/a", "Y/a"]
+    ]
+)]
 fn test_cases(
     #[case] existing: Vec<&str>,
     #[case] desired: Vec<&str>,
@@ -160,19 +168,28 @@ fn test_cases(
         .map(|title| Window::new(title.to_string()))
         .collect();
 
-    let operations_on_windows = Solver::derive_operations(&existing, &desired);
+    let actual = Solver::derive_operations(&existing, &desired);
+    let actual: Vec<Operation<String>> = actual
+        .into_iter()
+        .map(|op| match op {
+            Operation::GoTo(w) => Operation::GoTo(w.title),
+            Operation::MoveWindowForward(n) => Operation::MoveWindowForward(n),
+            Operation::CloseWindow => Operation::CloseWindow,
+            Operation::NewWindow(w) => Operation::NewWindow(w.title),
+            Operation::NewTab(w) => Operation::NewTab(w.title),
+        })
+        .collect();
 
-    let mut operations: Vec<Operation<&str>> = Vec::new();
-    for op in operations_on_windows {
-        match op {
-            Operation::GoTo(win) => operations.push(Operation::GoTo(&win.title)),
-            Operation::MoveWindowForward(usize) => {
-                operations.push(Operation::MoveWindowForward(usize))
-            }
-            Operation::CloseWindow => operations.push(Operation::CloseWindow),
-            Operation::NewWindow(win) => operations.push(Operation::NewWindow(&win.title)),
-        }
-    }
+    let expected: Vec<Operation<String>> = expected
+        .into_iter()
+        .map(|op| match op {
+            Operation::GoTo(s) => Operation::GoTo(s.to_string()),
+            Operation::MoveWindowForward(n) => Operation::MoveWindowForward(n),
+            Operation::CloseWindow => Operation::CloseWindow,
+            Operation::NewWindow(s) => Operation::NewWindow(s.to_string()),
+            Operation::NewTab(s) => Operation::NewTab(s.to_string()),
+        })
+        .collect();
 
-    assert_eq!(expected, operations)
+    assert_eq!(expected, actual)
 }

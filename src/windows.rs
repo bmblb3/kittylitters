@@ -8,6 +8,7 @@ use indexmap::IndexMap;
 
 #[derive(Debug, Clone)]
 pub struct Window {
+    pub tab_title: String,
     pub title: String,
     pub cwd: Option<String>,
     pub cmd: Option<String>,
@@ -35,8 +36,11 @@ impl Display for Window {
 
 impl Window {
     pub fn new(title: impl Into<String>) -> Self {
+        let title = title.into();
+        let tab_title = title.clone().split('/').next().expect("").to_string();
         Self {
-            title: title.into(),
+            tab_title,
+            title,
             cwd: None,
             cmd: None,
         }

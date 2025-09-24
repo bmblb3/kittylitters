@@ -4,20 +4,7 @@ use kittylitters::windows::Window;
 
 use kittylitters::set_logic::Operation;
 
-pub enum Kind {
-    Window,
-    Tab,
-}
-
-pub fn run_operations(
-    operations: Vec<Operation<&Window>>,
-    window_kind: Kind,
-) -> color_eyre::Result<()> {
-    let window_kind = match window_kind {
-        Kind::Window => "window",
-        Kind::Tab => "tab",
-    };
-
+pub fn run_operations(operations: Vec<Operation<Window>>) -> color_eyre::Result<()> {
     for operation in operations {
         match operation {
             Operation::GoTo(window) => {
@@ -36,19 +23,24 @@ pub fn run_operations(
                     .status()?;
             }
             Operation::MoveWindowForward(count) => {
-                let action = "move_".to_owned() + window_kind + "_forward";
                 for _ in 0..count {
                     Command::new("kitten")
-                        .args(["@", "action", action.as_str()])
+                        .args(["@", "action", "move_window_forward"])
                         .status()?;
                 }
             }
-            Operation::NewWindow(window) => {
+            Operation::NewWindow(ref window) | Operation::NewTab(ref window) => {
+                let kind = if let Operation::NewWindow(_) = operation {
+                    "window"
+                } else {
+                    "tab"
+                };
+
                 let mut args = vec![
                     "@".to_string(),
                     "launch".to_string(),
                     "--type".to_string(),
-                    window_kind.to_string(),
+                    kind.to_string(),
                     "--title".to_string(),
                     window.title.to_string(),
                 ];
