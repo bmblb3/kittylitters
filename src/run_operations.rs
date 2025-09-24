@@ -30,12 +30,12 @@ pub fn run_operations(
                     ])
                     .status()?;
             }
-            Operation::Close => {
+            Operation::CloseWindow => {
                 Command::new("kitten")
                     .args(["@", "action", "close_window"])
                     .status()?;
             }
-            Operation::MoveForward(count) => {
+            Operation::MoveWindowForward(count) => {
                 let action = "move_".to_owned() + window_kind + "_forward";
                 for _ in 0..count {
                     Command::new("kitten")
@@ -43,7 +43,7 @@ pub fn run_operations(
                         .status()?;
                 }
             }
-            Operation::New(window) => {
+            Operation::NewWindow(window) => {
                 let mut args = vec![
                     "@".to_string(),
                     "launch".to_string(),

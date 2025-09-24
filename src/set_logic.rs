@@ -9,9 +9,9 @@ pub struct Solver;
 #[derive(Clone, Debug, PartialEq)]
 pub enum Operation<T> {
     GoTo(T),
-    MoveForward(usize),
-    Close,
-    New(T),
+    MoveWindowForward(usize),
+    CloseWindow,
+    NewWindow(T),
 }
 
 impl Solver {
@@ -50,7 +50,7 @@ impl Solver {
                     && !current_set.contains(target_item)
                 {
                     operations.push(Operation::GoTo(last_aligned_item));
-                    operations.push(Operation::New(target_item));
+                    operations.push(Operation::NewWindow(target_item));
                     let insert_index = current_set
                         .get_index_of(last_aligned_item)
                         .expect("`last_aligned_item` should exist in `current_set`");
@@ -59,14 +59,14 @@ impl Solver {
                     && !target_set.contains(current_item)
                 {
                     operations.push(Operation::GoTo(*current_item));
-                    operations.push(Operation::Close);
+                    operations.push(Operation::CloseWindow);
                     current_set.shift_remove(current_item);
                 } else if let Some(snapshot_item) = snapshot_item
                     && let Some(index) = current_set.get_index_of(snapshot_item)
                     && let Some(target_index) = target_set.get_index_of(snapshot_item)
                 {
                     operations.push(Operation::GoTo(snapshot_item));
-                    operations.push(Operation::MoveForward(target_index - index));
+                    operations.push(Operation::MoveWindowForward(target_index - index));
                     for i in index..target_index {
                         current_set.swap_indices(i, i + 1);
                     }
