@@ -8,6 +8,7 @@ pub struct Solver;
 #[derive(Clone, Debug, PartialEq)]
 pub enum Operation<T> {
     GoTo(T),
+    MoveTabForward,
     MoveWindowForward,
     CloseWindow,
     NewWindow(T),
@@ -68,7 +69,17 @@ impl Solver {
                 {
                     operations.push(Operation::GoTo(snapshot_item.to_owned().clone()));
                     for i in index..target_index {
-                        operations.push(Operation::MoveWindowForward);
+                        let this_tab = desired_window_set.get_index(i).unwrap().tab_title.clone();
+                        let next_tab = desired_window_set
+                            .get_index(i + 1)
+                            .unwrap()
+                            .tab_title
+                            .clone();
+                        if this_tab == next_tab {
+                            operations.push(Operation::MoveWindowForward);
+                        } else {
+                            operations.push(Operation::MoveTabForward);
+                        }
                         current_window_set.swap_indices(i, i + 1);
                     }
                 }

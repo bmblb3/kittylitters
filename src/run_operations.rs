@@ -22,9 +22,15 @@ pub fn run_operations(operations: Vec<Operation<Window>>) -> color_eyre::Result<
                     .args(["@", "action", "close_window"])
                     .status()?;
             }
-            Operation::MoveWindowForward => {
+            Operation::MoveWindowForward | Operation::MoveTabForward => {
+                let kind = if let Operation::MoveWindowForward = operation {
+                    "window"
+                } else {
+                    "tab"
+                };
+                let action = "move_".to_owned() + kind + "_forward";
                 Command::new("kitten")
-                    .args(["@", "action", "move_window_forward"])
+                    .args(["@", "action", action.as_str()])
                     .status()?;
             }
             Operation::NewWindow(ref window) | Operation::NewTab(ref window) => {
@@ -33,7 +39,6 @@ pub fn run_operations(operations: Vec<Operation<Window>>) -> color_eyre::Result<
                 } else {
                     "tab"
                 };
-
                 let mut args = vec![
                     "@".to_string(),
                     "launch".to_string(),

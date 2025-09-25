@@ -142,16 +142,24 @@ use kittylitters::{
         Operation::NewWindow("X/d"),  // vec!["X/a", [X/d], "X/b", "X/c"]
         Operation::GoTo("X/a"),       // vec![[X/a], "X/d", "X/b", "X/c"]
         Operation::MoveWindowForward, // vec!["X/d", [X/a], "X/b", "X/c"]
-        Operation::GoTo("X/c"),          // vec!["X/d", "X/a", "X/b", [X/c]]
-        Operation::CloseWindow           // vec!["X/d", "X/a", "X/b"]
+        Operation::GoTo("X/c"),       // vec!["X/d", "X/a", "X/b", [X/c]]
+        Operation::CloseWindow        // vec!["X/d", "X/a", "X/b"]
     ]
 )]
 #[case(
     vec!["X/a"],
     vec!["X/a", "Y/a"],
     vec![
-        Operation::GoTo("X/a"),          // vec![[X/a]]
-        Operation::NewTab("Y/a"),        // vec!["X/a", "Y/a"]
+        Operation::GoTo("X/a"),       // vec![[X/a]]
+        Operation::NewTab("Y/a"),     // vec!["X/a", "Y/a"]
+    ]
+)]
+#[case(
+    vec!["X/a", "Y/a"],
+    vec!["Y/a", "X/a"],
+    vec![
+        Operation::GoTo("X/a"),       // vec![[X/a], "Y/a"]
+        Operation::MoveTabForward,    // vec!["Y/a", [X/a]]
     ]
 )]
 fn test_cases(
@@ -173,10 +181,11 @@ fn test_cases(
         .into_iter()
         .map(|op| match op {
             Operation::GoTo(w) => Operation::GoTo(w.title),
+            Operation::MoveTabForward => Operation::MoveTabForward,
             Operation::MoveWindowForward => Operation::MoveWindowForward,
             Operation::CloseWindow => Operation::CloseWindow,
-            Operation::NewWindow(w) => Operation::NewWindow(w.title),
             Operation::NewTab(w) => Operation::NewTab(w.title),
+            Operation::NewWindow(w) => Operation::NewWindow(w.title),
         })
         .collect();
 
@@ -184,10 +193,11 @@ fn test_cases(
         .into_iter()
         .map(|op| match op {
             Operation::GoTo(s) => Operation::GoTo(s.to_string()),
+            Operation::MoveTabForward => Operation::MoveTabForward,
             Operation::MoveWindowForward => Operation::MoveWindowForward,
             Operation::CloseWindow => Operation::CloseWindow,
-            Operation::NewWindow(s) => Operation::NewWindow(s.to_string()),
             Operation::NewTab(s) => Operation::NewTab(s.to_string()),
+            Operation::NewWindow(s) => Operation::NewWindow(s.to_string()),
         })
         .collect();
 
