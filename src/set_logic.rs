@@ -8,7 +8,7 @@ pub struct Solver;
 #[derive(Clone, Debug, PartialEq)]
 pub enum Operation<T> {
     GoTo(T),
-    MoveWindowForward(usize),
+    MoveWindowForward,
     CloseWindow,
     NewWindow(T),
     NewTab(T),
@@ -67,8 +67,8 @@ impl Solver {
                     && let Some(target_index) = desired_window_set.get_index_of(snapshot_item)
                 {
                     operations.push(Operation::GoTo(snapshot_item.to_owned().clone()));
-                    operations.push(Operation::MoveWindowForward(target_index - index));
                     for i in index..target_index {
+                        operations.push(Operation::MoveWindowForward);
                         current_window_set.swap_indices(i, i + 1);
                     }
                 }

@@ -22,12 +22,10 @@ pub fn run_operations(operations: Vec<Operation<Window>>) -> color_eyre::Result<
                     .args(["@", "action", "close_window"])
                     .status()?;
             }
-            Operation::MoveWindowForward(count) => {
-                for _ in 0..count {
-                    Command::new("kitten")
-                        .args(["@", "action", "move_window_forward"])
-                        .status()?;
-                }
+            Operation::MoveWindowForward => {
+                Command::new("kitten")
+                    .args(["@", "action", "move_window_forward"])
+                    .status()?;
             }
             Operation::NewWindow(ref window) | Operation::NewTab(ref window) => {
                 let kind = if let Operation::NewWindow(_) = operation {
