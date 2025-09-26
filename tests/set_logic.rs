@@ -162,6 +162,14 @@ use kittylitters::{
         Operation::MoveTabForward,    // vec!["Y/a", [X/a]]
     ]
 )]
+#[case(
+    vec!["X/a", "X/b", "Y/a"],
+    vec!["Y/a", "X/a", "X/b"],
+    vec![
+        Operation::GoTo("X/a"),       // vec![[X/a], "X/b", "Y/a"]
+        Operation::MoveTabForward,    // vec!["Y/a", [X/a], "X/b"]
+    ]
+)]
 fn test_cases(
     #[case] existing: Vec<&str>,
     #[case] desired: Vec<&str>,

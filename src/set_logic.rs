@@ -67,20 +67,56 @@ impl Solver {
                     && let Some(index) = current_window_set.get_index_of(snapshot_item)
                     && let Some(target_index) = desired_window_set.get_index_of(snapshot_item)
                 {
+                    let snapshot_tab = snapshot_item.tab_title.clone();
+                    let desired_tab = desired_window_set
+                        .get_index(index)
+                        .unwrap()
+                        .tab_title
+                        .clone();
+
                     operations.push(Operation::GoTo(snapshot_item.to_owned().clone()));
-                    for i in index..target_index {
-                        let this_tab = desired_window_set.get_index(i).unwrap().tab_title.clone();
-                        let next_tab = desired_window_set
-                            .get_index(i + 1)
-                            .unwrap()
-                            .tab_title
-                            .clone();
-                        if this_tab == next_tab {
-                            operations.push(Operation::MoveWindowForward);
-                        } else {
+                    if snapshot_tab != desired_tab {
+                        // tab
+                        let mut next_tab_indices = vec![index];
+                        let mut i = index;
+                        while let Some(this_window) = current_window_set.get_index(i)
+                            && let Some(next_window) = current_window_set.get_index(i + 1)
+                        {
+                            i += 1;
+                            if this_window.tab_title == next_window.tab_title {
+                                continue;
+                            }
+
                             operations.push(Operation::MoveTabForward);
+                            next_tab_indices.push(i);
+                            if next_window.tab_title == desired_tab {
+                                break;
+                            }
                         }
-                        current_window_set.swap_indices(i, i + 1);
+                        next_tab_indices.push(i + 1);
+                        let w: Vec<&[usize]> = next_tab_indices.windows(2).collect();
+                        let (left, right) = w.split_at(1);
+                        let shifted = [right.to_vec(), left.to_vec()].concat();
+                        let ashifted = shifted
+                            .iter()
+                            .flat_map(|x| (x[0]..x[1]).collect::<Vec<_>>())
+                            .collect::<Vec<usize>>();
+                        let mut bshifted = ashifted.iter();
+
+                        let cloned = current_window_set.clone();
+                        let mut i = index;
+                        while let Some(i2) = bshifted.next()
+                            && let Some(item) = cloned.get_index(*i2)
+                        {
+                            current_window_set.shift_insert(i, item);
+                            i += 1;
+                        }
+                    } else {
+                        // window
+                        for i in index..target_index {
+                            operations.push(Operation::MoveWindowForward);
+                            current_window_set.swap_indices(i, i + 1);
+                        }
                     }
                 }
                 break;
