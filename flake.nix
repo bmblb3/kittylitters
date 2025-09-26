@@ -34,6 +34,7 @@
               release-plz
               cargo-audit
               bacon
+              cargo-nextest
             ];
           };
       }

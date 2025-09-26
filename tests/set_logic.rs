@@ -170,6 +170,45 @@ use kittylitters::{
         Operation::MoveTabForward,    // vec!["Y/a", [X/a], "X/b"]
     ]
 )]
+#[case(
+    vec!["X/a", "Y/a", "Y/b"],
+    vec!["Y/a", "Y/b", "X/a"],
+    vec![
+        Operation::GoTo("X/a"),       // vec![[X/a], "Y/a", "Y/b"]
+        Operation::MoveTabForward,    // vec!["Y/a", "Y/b", [X/a]]
+    ]
+)]
+#[case(
+    vec!["X/a", "X/b", "Y/a"],
+    vec!["Y/a", "X/b", "X/a"],
+    vec![
+        Operation::GoTo("X/a"),       // vec![[X/a], "X/b", "Y/a"]
+        Operation::MoveTabForward,    // vec!["Y/a", [X/a], "X/b"]
+        Operation::GoTo("X/a"),       // vec!["Y/a", [X/a], "X/b"]
+        Operation::MoveWindowForward, // vec!["Y/a", "X/b", [X/a]]
+    ]
+)]
+#[case(
+    vec!["X/a", "Y/a", "Z/a"],
+    vec!["X/a", "Y/a", "Z/a"],
+    vec![]
+)]
+#[case(
+    vec!["X/a", "Y/a", "Z/a"],
+    vec!["Y/a", "X/a", "Z/a"],
+    vec![
+        Operation::GoTo("X/a"),       // vec![[X/a], "Y/a", "Z/a"]
+        Operation::MoveTabForward,    // vec!["Y/a", [X/a], "Z/a"]
+    ]
+)]
+#[case(
+    vec!["X/a", "Y/a", "Z/a"],
+    vec!["X/a", "Z/a", "Y/a"],
+    vec![
+        Operation::GoTo("Y/a"),       // vec!["X/a", [Y/a], "Z/a"]
+        Operation::MoveTabForward,    // vec!["X/a", "Z/a", [Y/a]]
+    ]
+)]
 fn test_cases(
     #[case] existing: Vec<&str>,
     #[case] desired: Vec<&str>,

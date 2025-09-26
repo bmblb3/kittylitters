@@ -82,18 +82,21 @@ impl Solver {
                         while let Some(this_window) = current_window_set.get_index(i)
                             && let Some(next_window) = current_window_set.get_index(i + 1)
                         {
-                            i += 1;
                             if this_window.tab_title == next_window.tab_title {
+                                i += 1;
                                 continue;
                             }
 
-                            operations.push(Operation::MoveTabForward);
-                            next_tab_indices.push(i);
-                            if next_window.tab_title == desired_tab {
+                            if this_window.tab_title == desired_tab {
                                 break;
                             }
+
+                            operations.push(Operation::MoveTabForward);
+                            next_tab_indices.push(i + 1);
+                            i += 1;
                         }
                         next_tab_indices.push(i + 1);
+
                         let w: Vec<&[usize]> = next_tab_indices.windows(2).collect();
                         let (left, right) = w.split_at(1);
                         let shifted = [right.to_vec(), left.to_vec()].concat();
@@ -101,8 +104,11 @@ impl Solver {
                             .iter()
                             .flat_map(|x| (x[0]..x[1]).collect::<Vec<_>>())
                             .collect::<Vec<usize>>();
+                        dbg!(&ashifted);
+
                         let mut bshifted = ashifted.iter();
 
+                        dbg!(&current_window_set);
                         let cloned = current_window_set.clone();
                         let mut i = index;
                         while let Some(i2) = bshifted.next()
@@ -111,6 +117,7 @@ impl Solver {
                             current_window_set.shift_insert(i, item);
                             i += 1;
                         }
+                        dbg!(&current_window_set);
                     } else {
                         // window
                         for i in index..target_index {
