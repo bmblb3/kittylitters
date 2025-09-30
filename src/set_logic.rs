@@ -1,4 +1,5 @@
-use indexmap::IndexSet;
+use indexmap::{IndexMap, IndexSet};
+use itertools::Itertools;
 use std::fmt::Debug;
 
 use crate::windows::Window;
@@ -24,7 +25,7 @@ impl Solver {
         let desired_window_set: IndexSet<_> = desired_windows.iter().collect();
 
         let mut operations = Vec::new();
-        for _ in 0..1000 {
+        for _ in 0..10 {
             let snapshot = current_window_set.clone();
             let mut last_aligned_window = snapshot[0];
 
@@ -32,95 +33,85 @@ impl Solver {
             let mut desired_iter = desired_window_set.iter();
 
             loop {
-                let snapshot_item = snapshot_iter.next();
-                let desired_item = desired_iter.next();
+                let snapshot_window = snapshot_iter.next();
+                let desired_window = desired_iter.next();
 
-                if snapshot_item.is_none() && desired_item.is_none() {
+                if snapshot_window.is_none() && desired_window.is_none() {
                     break;
                 }
 
-                if snapshot_item == desired_item {
-                    last_aligned_window = snapshot_item.unwrap();
+                if let Some(snapshot_window) = snapshot_window
+                    && let Some(desired_window) = desired_window
+                    && snapshot_window == desired_window
+                {
+                    last_aligned_window = snapshot_window;
                     continue;
                 }
 
-                if let Some(target_item) = desired_item
-                    && !current_window_set.contains(target_item)
+                if let Some(desired_window) = desired_window
+                    && !current_window_set.contains(desired_window)
                 {
                     operations.push(Operation::GoTo(last_aligned_window.clone()));
-                    if last_aligned_window.tab_title == target_item.tab_title {
-                        operations.push(Operation::NewWindow(target_item.to_owned().clone()));
+                    if last_aligned_window.tab_title == desired_window.tab_title {
+                        operations.push(Operation::NewWindow(desired_window.to_owned().clone()));
                     } else {
-                        operations.push(Operation::NewTab(target_item.to_owned().clone()));
+                        operations.push(Operation::NewTab(desired_window.to_owned().clone()));
                     }
                     let insert_index = current_window_set
                         .get_index_of(last_aligned_window)
-                        .expect("`last_aligned_item` should exist in `current_set`");
-                    current_window_set.shift_insert(insert_index + 1, target_item);
-                } else if let Some(current_item) = snapshot_item
-                    && !desired_window_set.contains(current_item)
+                        .expect("`last_aligned_window` should exist in `current_window_set`");
+                    current_window_set.shift_insert(insert_index + 1, desired_window);
+                } else if let Some(current_window) = snapshot_window
+                    && !desired_window_set.contains(current_window)
                 {
-                    operations.push(Operation::GoTo(current_item.to_owned().clone()));
+                    operations.push(Operation::GoTo(current_window.to_owned().clone()));
                     operations.push(Operation::CloseWindow);
-                    current_window_set.shift_remove(current_item);
-                } else if let Some(snapshot_item) = snapshot_item
-                    && let Some(index) = current_window_set.get_index_of(snapshot_item)
-                    && let Some(target_index) = desired_window_set.get_index_of(snapshot_item)
+                    current_window_set.shift_remove(current_window);
+                } else if let Some(snapshot_window) = snapshot_window
+                    && let Some(current_index) = current_window_set.get_index_of(snapshot_window)
+                    && let Some(desired_window_here) = desired_window_set.get_index(current_index)
+                    && let Some(destination_index) =
+                        desired_window_set.get_index_of(snapshot_window)
                 {
-                    let snapshot_tab = snapshot_item.tab_title.clone();
-                    let desired_tab = desired_window_set
-                        .get_index(index)
-                        .unwrap()
-                        .tab_title
-                        .clone();
-
-                    operations.push(Operation::GoTo(snapshot_item.to_owned().clone()));
-                    if snapshot_tab != desired_tab {
+                    operations.push(Operation::GoTo(snapshot_window.to_owned().clone()));
+                    if snapshot_window.tab_title != desired_window_here.tab_title {
                         // tab
-                        let mut next_tab_indices = vec![index];
-                        let mut i = index;
-                        while let Some(this_window) = current_window_set.get_index(i)
-                            && let Some(next_window) = current_window_set.get_index(i + 1)
-                        {
-                            if this_window.tab_title == next_window.tab_title {
-                                i += 1;
-                                continue;
-                            }
-
-                            if this_window.tab_title == desired_tab {
-                                break;
-                            }
-
-                            operations.push(Operation::MoveTabForward);
-                            next_tab_indices.push(i + 1);
-                            i += 1;
-                        }
-                        next_tab_indices.push(i + 1);
-
-                        let w: Vec<&[usize]> = next_tab_indices.windows(2).collect();
-                        let (left, right) = w.split_at(1);
-                        let shifted = [right.to_vec(), left.to_vec()].concat();
-                        let ashifted = shifted
+                        let snapshot_indices_groupedby_tab = current_window_set
                             .iter()
-                            .flat_map(|x| (x[0]..x[1]).collect::<Vec<_>>())
-                            .collect::<Vec<usize>>();
-                        dbg!(&ashifted);
+                            .chunk_by(|window| window.tab_title.to_string())
+                            .into_iter()
+                            .map(|(tab_title, group)| (tab_title, group.collect::<Vec<_>>()))
+                            .collect::<IndexMap<String, Vec<_>>>();
 
-                        let mut bshifted = ashifted.iter();
+                        let desired_indices_groupedby_tab = desired_window_set
+                            .iter()
+                            .chunk_by(|window| window.tab_title.to_string())
+                            .into_iter()
+                            .map(|(tab_title, group)| (tab_title, group.collect::<Vec<_>>()))
+                            .collect::<IndexMap<String, Vec<_>>>();
 
-                        dbg!(&current_window_set);
-                        let cloned = current_window_set.clone();
-                        let mut i = index;
-                        while let Some(i2) = bshifted.next()
-                            && let Some(item) = cloned.get_index(*i2)
-                        {
-                            current_window_set.shift_insert(i, item);
-                            i += 1;
+                        let current_tab_pos = snapshot_indices_groupedby_tab
+                            .get_index_of(&snapshot_window.tab_title)
+                            .expect("tab should be present in group");
+                        let desired_tab_pos = desired_indices_groupedby_tab
+                            .get_index_of(&snapshot_window.tab_title)
+                            .expect("tab should be present in group");
+
+                        let mut rearranged_tabs = snapshot_indices_groupedby_tab.clone();
+                        for i in current_tab_pos..desired_tab_pos {
+                            operations.push(Operation::MoveTabForward);
+                            rearranged_tabs.swap_indices(i, i + 1);
                         }
-                        dbg!(&current_window_set);
+
+                        current_window_set = rearranged_tabs
+                            .values()
+                            .flatten()
+                            .cloned()
+                            .cloned()
+                            .collect::<IndexSet<_>>();
                     } else {
                         // window
-                        for i in index..target_index {
+                        for i in current_index..destination_index {
                             operations.push(Operation::MoveWindowForward);
                             current_window_set.swap_indices(i, i + 1);
                         }
