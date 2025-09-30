@@ -42,9 +42,7 @@ pub fn collect_windows() -> color_eyre::Result<CascadeType> {
                 .as_str()
                 .expect("`window[title]` should parse to a String");
 
-            let (tab_title, window_title) = title
-                .split_once("/")
-                .expect("Existing window titles should be of the form '<tab>/<window>'");
+            let (tab_title, window_title) = title.split_once("/").unwrap_or((title, ""));
 
             cascade
                 .entry(tab_title.to_string())
