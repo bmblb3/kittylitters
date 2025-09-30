@@ -33,6 +33,8 @@
               cargo-semver-checks
               release-plz
               cargo-audit
+              bacon
+              cargo-nextest
             ];
           };
       }
