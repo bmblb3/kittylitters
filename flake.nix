@@ -22,13 +22,27 @@
         pkgs = import nixpkgs {
           inherit system overlays;
         };
+        rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
       in
       {
+        packages = {
+          default = pkgs.rustPlatform.buildRustPackage rec {
+            pname = "kittylitters";
+            version = "0.2.0";
+            name = "${pname}-${version}";
+            src = ./.;
+            cargoLock = {
+              lockFile = ./Cargo.lock;
+            };
+            nativeBuildInputs = [ rustToolchain ];
+          };
+        };
+
         devShells.default =
           with pkgs;
           mkShell {
             buildInputs = [
-              (rust-bin.fromRustupToolchainFile ./rust-toolchain.toml)
+              rustToolchain
               cargo-release
               cargo-semver-checks
               release-plz
