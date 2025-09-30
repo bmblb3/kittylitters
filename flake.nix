@@ -26,8 +26,10 @@
       in
       {
         packages = {
-          default = pkgs.rustPlatform.buildRustPackage {
-            name = "kittylitters";
+          default = pkgs.rustPlatform.buildRustPackage rec {
+            pname = "kittylitters";
+            version = "0.2.0";
+            name = "${pname}-${version}";
             src = ./.;
             cargoLock = {
               lockFile = ./Cargo.lock;
