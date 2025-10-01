@@ -28,7 +28,7 @@
         packages = {
           default = pkgs.rustPlatform.buildRustPackage rec {
             pname = "kittylitters";
-            version = "0.2.0";
+            version = "0.2.1";
             name = "${pname}-${version}";
             src = ./.;
             cargoLock = {
