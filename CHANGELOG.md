@@ -11,12 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- add version and pname
 - add build to flake
-
-### Other
-
-- fix CHANGELOG
 
 ## [0.2.0](https://github.com/bmblb3/kittylitters/compare/v0.1.0...v0.2.0) - 2025-09-30
 
