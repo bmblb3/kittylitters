@@ -42,13 +42,15 @@
           with pkgs;
           mkShell {
             buildInputs = [
-              rustToolchain
+              bacon
+              cargo-audit
+              cargo-nextest
               cargo-release
               cargo-semver-checks
               release-plz
-              cargo-audit
-              bacon
-              cargo-nextest
+              pre-commit
+              ra-multiplex
+              rustToolchain
             ];
           };
       }
