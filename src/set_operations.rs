@@ -87,7 +87,7 @@ mod tests {
         &["A"],
         &["A", "B"],
         &[
-            Operations::GoTo("A"),  // ["A"    ]
+            Operations::GoTo("A"),  // ["A",   ]
             Operations::Create("B") // [ A , B ]
         ]
     )]
@@ -96,7 +96,7 @@ mod tests {
         &["B"],
         &[
             Operations::GoTo("A"), // ["A", B ]
-            Operations::Close      // [ B     ]
+            Operations::Close      // [ B ,   ]
         ]
     )]
     #[case(
@@ -104,39 +104,39 @@ mod tests {
         &["A"],
         &[
             Operations::GoTo("B"), // [ A ,"B"]
-            Operations::Close      // [ B     ]
+            Operations::Close      // [ B ,   ]
         ]
     )]
     #[case(
         &["A"],
         &["B"],
         &[
-            Operations::GoTo("A"),   // ["A"    ]
+            Operations::GoTo("A"),   // ["A",   ]
             Operations::Create("B"), // [ A , B ]
             Operations::GoTo("A"),   // ["A", B ]
-            Operations::Close,       // [     B ]
+            Operations::Close,       // [   , B ]
         ]
     )]
     #[case(
         &["A", "B"],
         &["C"],
         &[
-            Operations::GoTo("A"),   // ["A",     B ]
+            Operations::GoTo("A"),   // ["A",   , B ]
             Operations::Create("C"), // [ A , C , B ]
             Operations::GoTo("A"),   // ["A", C , B ]
-            Operations::Close,       // [     C , B ]
-            Operations::GoTo("B"),   // [     C ,"B"]
-            Operations::Close        // [     C     ]
+            Operations::Close,       // [   , C , B ]
+            Operations::GoTo("B"),   // [   , C ,"B"]
+            Operations::Close        // [   , C ,   ]
         ]
     )]
     #[case(
         &["A", "B"],
         &["A", "C"],
         &[
-            Operations::GoTo("A"),   // [[A], B     ]
+            Operations::GoTo("A"),   // [[A], B ,   ]
             Operations::Create("C"), // [ A , C , B ]
             Operations::GoTo("B"),   // [ A , C ,[B]]
-            Operations::Close,       // [ A , C     ]
+            Operations::Close,       // [ A , C ,   ]
         ]
     )]
     #[case(
@@ -147,6 +147,34 @@ mod tests {
             Operations::Close,      // [   , B ,   ]
             Operations::GoTo("B"),  // [   ,"B",   ]
             Operations::Create("C") // [   , B , C ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["A", "B", "C", "D"],
+        &[
+            Operations::GoTo("C"),  // [ A , B ,"C",   ]
+            Operations::Create("D") // [ A , B , C , D ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["A", "B", "D"],
+        &[
+            Operations::GoTo("B"),   // [ A ,"B",   , C ]
+            Operations::Create("D"), // [ A , B , D , C ]
+            Operations::GoTo("C"),   // [ A , B , D ,"C"]
+            Operations::Close,       // [ A , B , D ,   ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["A", "D", "C"],
+        &[
+            Operations::GoTo("A"),   // ["A",   , B , C ]
+            Operations::Create("D"), // [ A , D , B , C ]
+            Operations::GoTo("B"),   // [ A , D ,"B", C ]
+            Operations::Close,       // [ A , D ,   , C ]
         ]
     )]
     fn test_set_operations(
