@@ -7,7 +7,7 @@ pub fn set_operations<T>(
     desired_set: IndexSet<T>,
 ) -> Vec<Operations<T>>
 where
-    T: Eq + Hash + Clone,
+    T: Eq + Hash + Copy,
 {
     let mut operations = Vec::new();
     for _ in 1..100 {
@@ -38,8 +38,14 @@ where
                 && !&current_set.contains(target_item)
             {
                 operations.push(Operations::GoTo(get_prev_item(&current_set, i)));
-                operations.push(Operations::Create(target_item.clone()));
-                current_set.shift_insert(i, target_item.clone());
+                operations.push(Operations::Create(*target_item));
+                current_set.shift_insert(i, *target_item);
+            } else if let Some(this_item) = &this_item
+                && !&desired_set.contains(this_item)
+            {
+                operations.push(Operations::GoTo(*this_item));
+                operations.push(Operations::Close);
+                current_set.shift_remove_index(i);
             }
         }
     }
@@ -48,22 +54,20 @@ where
 
 fn get_prev_item<T>(current_set: &IndexSet<T>, i: usize) -> T
 where
-    T: Hash + Eq + Clone,
+    T: Copy,
 {
     let prev_id = i.saturating_sub(1).min(current_set.len() - 1);
-    current_set
-        .get_index(prev_id)
-        .expect(
-            "`current_set` should be indexed by `prev_id`, which is is
+    *current_set.get_index(prev_id).expect(
+        "`current_set` should be indexed by `prev_id`, which is is
 inside the index range",
-        )
-        .clone()
+    )
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Operations<T> {
     GoTo(T),
     Create(T),
+    Close,
 }
 
 #[cfg(test)]
@@ -80,8 +84,16 @@ mod tests {
         &["A"],
         &["A", "B"],
         &[
-            Operations::GoTo("A"),  // &[[A]]
-            Operations::Create("B") // &["A", "B"]
+            Operations::GoTo("A"),  // &["A"     ]
+            Operations::Create("B") // &[ A ,  B ]
+        ]
+    )]
+    #[case(
+        &["A", "B"],
+        &["B"],
+        &[
+            Operations::GoTo("A"), // &["A",  B ]
+            Operations::Close      // &[ B      ]
         ]
     )]
     fn test_set_operations(
