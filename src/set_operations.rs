@@ -139,6 +139,16 @@ mod tests {
             Operations::Close,       // [ A , C     ]
         ]
     )]
+    #[case(
+        &["A", "B"],
+        &["B", "C"],
+        &[
+            Operations::GoTo("A"),  // ["A", B ,   ]
+            Operations::Close,      // [   , B ,   ]
+            Operations::GoTo("B"),  // [   ,"B",   ]
+            Operations::Create("C") // [   , B , C ]
+        ]
+    )]
     fn test_set_operations(
         #[case] current: &[&str],
         #[case] desired: &[&str],
