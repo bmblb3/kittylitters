@@ -108,6 +108,16 @@ mod tests {
         ]
     )]
     #[case(
+        &["A"],
+        &["B"],
+        &[
+            Operations::GoTo("A"),   // ["A"    ]
+            Operations::Create("B"), // [ A , B ]
+            Operations::GoTo("A"),   // ["A", B ]
+            Operations::Close,       // [     B ]
+        ]
+    )]
+    #[case(
         &["A", "B"],
         &["C"],
         &[
