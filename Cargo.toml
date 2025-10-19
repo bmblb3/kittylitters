@@ -16,3 +16,7 @@ shell-words = "1.1.0"
 
 [dev-dependencies]
 rstest = "0.26.1"
+
+[lints.clippy]
+used_underscore_binding = "warn"
+used_underscore_items = "warn"
