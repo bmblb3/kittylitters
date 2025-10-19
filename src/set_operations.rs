@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::hash::Hash;
 
 use indexmap::IndexSet;
@@ -7,10 +8,10 @@ pub fn set_operations<T>(
     desired_set: IndexSet<T>,
 ) -> Vec<Operations<T>>
 where
-    T: Eq + Hash + Copy,
+    T: Eq + Hash + Copy + Debug,
 {
     let mut operations = Vec::new();
-    for _ in 1..100 {
+    for _ in 1..5 {
         if desired_set == current_set {
             break;
         }
@@ -19,7 +20,7 @@ where
         let mut current_iter = cs.iter();
         let mut desired_iter = desired_set.iter();
 
-        for i in 0..100 {
+        for i in 0..5 {
             let this_item = current_iter.next().cloned();
             let target_item = desired_iter.next().cloned();
 
@@ -39,8 +40,10 @@ where
             {
                 operations.push(Operations::GoTo(get_prev_item(&current_set, i)));
                 operations.push(Operations::Create(*target_item));
-                current_set.shift_insert(i, *target_item);
-            } else if let Some(this_item) = &this_item
+                current_set.shift_insert((i + 1).min(current_set.len()), *target_item);
+            }
+
+            if let Some(this_item) = &this_item
                 && !&desired_set.contains(this_item)
             {
                 operations.push(Operations::GoTo(*this_item));
@@ -84,24 +87,46 @@ mod tests {
         &["A"],
         &["A", "B"],
         &[
-            Operations::GoTo("A"),  // &["A"     ]
-            Operations::Create("B") // &[ A ,  B ]
+            Operations::GoTo("A"),  // ["A"    ]
+            Operations::Create("B") // [ A , B ]
         ]
     )]
     #[case(
         &["A", "B"],
         &["B"],
         &[
-            Operations::GoTo("A"), // &["A",  B ]
-            Operations::Close      // &[ B      ]
+            Operations::GoTo("A"), // ["A", B ]
+            Operations::Close      // [ B     ]
         ]
     )]
     #[case(
         &["A", "B"],
         &["A"],
         &[
-            Operations::GoTo("B"), // &[ A , "B"]
-            Operations::Close      // &[ B      ]
+            Operations::GoTo("B"), // [ A ,"B"]
+            Operations::Close      // [ B     ]
+        ]
+    )]
+    #[case(
+        &["A", "B"],
+        &["C"],
+        &[
+            Operations::GoTo("A"),   // ["A",     B ]
+            Operations::Create("C"), // [ A , C , B ]
+            Operations::GoTo("A"),   // ["A", C , B ]
+            Operations::Close,       // [     C , B ]
+            Operations::GoTo("B"),   // [     C ,"B"]
+            Operations::Close        // [     C     ]
+        ]
+    )]
+    #[case(
+        &["A", "B"],
+        &["A", "C"],
+        &[
+            Operations::GoTo("A"),   // [[A], B     ]
+            Operations::Create("C"), // [ A , C , B ]
+            Operations::GoTo("B"),   // [ A , C ,[B]]
+            Operations::Close,       // [ A , C     ]
         ]
     )]
     fn test_set_operations(
