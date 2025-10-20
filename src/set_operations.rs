@@ -8,9 +8,8 @@ pub fn set_operations<T>(
     desired_set: IndexSet<T>,
 ) -> Vec<Operations<T>>
 where
-    T: Eq + Hash + Copy + Debug,
+    T: Eq + Hash + Clone + Debug,
 {
-    dbg!(&current_set);
     let mut operations = Vec::new();
     loop {
         if desired_set.iter().eq(&current_set) {
@@ -41,25 +40,26 @@ where
                 let goto_item = if let Some(latest_aligned) = latest_aligned {
                     latest_aligned
                 } else {
-                    *current_set
+                    current_set
                         .first()
                         .expect("`current_set` should have a first element")
+                        .clone()
                 };
-                operations.push(Operations::GoTo(goto_item));
+                operations.push(Operations::GoTo(goto_item.clone()));
                 let this_index = current_set.get_index_of(&goto_item).expect(
                     "`goto_item` should be present in `current_set` since it
                  was picked from there",
                 );
 
-                operations.push(Operations::Create(*target_item));
-                current_set.shift_insert(this_index + 1, *target_item);
+                operations.push(Operations::Create(target_item.clone()));
+                current_set.shift_insert(this_index + 1, target_item.clone());
                 break;
             }
 
             if let Some(this_item) = &this_item
                 && !&desired_set.contains(this_item)
             {
-                operations.push(Operations::GoTo(*this_item));
+                operations.push(Operations::GoTo(this_item.clone()));
                 let this_index = current_set.get_index_of(this_item).expect(
                     "`this_item` should be present in `current_set` since it was picked from there",
                 );
@@ -81,7 +81,7 @@ where
                             "`this_index` <= `i2` <= `target_index` so it should index into \
                              current_set",
                         );
-                        operations.push(Operations::GoTo(*goto_item));
+                        operations.push(Operations::GoTo(goto_item.clone()));
                         operations.push(Operations::MoveForward);
                         current_set.swap_indices(i2, i2 + 1);
                     }

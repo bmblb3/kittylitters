@@ -1,32 +1,104 @@
-mod run_operations;
-
 use std::process::Command;
 
-use kittylitters::collect_windows::collect_windows;
-use kittylitters::read_yml::read_session_yml;
-use kittylitters::set_logic::Solver;
-use kittylitters::windows::Window;
+use kittylitters::Operations::*;
 
 fn main() -> color_eyre::Result<()> {
-    let current_windows = collect_windows()?;
-    let current_windows: Vec<Window> = Window::from_titles(&current_windows);
-
-    let home_dir = std::env::var("HOME").expect("HOME environment variable should be set");
+    let home_dir = std::env::var("HOME").expect(
+        "HOME environment variable should
+    // be set",
+    );
     let config_path = format!("{}/.config/kitty/session.yml", home_dir);
 
-    let editor = if let Ok(e) = std::env::var("EDITOR") {
-        e
-    } else {
-        "vi".to_string()
-    };
-    Command::new(editor).arg(&config_path).status()?;
+    // let editor = if let Ok(e) = std::env::var("EDITOR") {
+    //     e
+    // } else {
+    //     "vi".to_string()
+    // };
+    // Command::new(editor).arg(&config_path).status()?;
 
-    let desired_windows = read_session_yml(&config_path)
-        .expect("Expect a valid yml file at ~/.config/kitty/session.yml");
-    let desired_windows: Vec<Window> = Window::from_instructions(&desired_windows);
+    let desired_tabs = kittylitters::read_session_yml(&config_path)?;
 
-    let window_operations = Solver::derive_operations(&current_windows, &desired_windows);
-    run_operations::run_operations(window_operations)?;
+    let mut current_tabs = kittylitters::collect_windows()?;
+    let tab_ops = kittylitters::set_operations(current_tabs.clone(), desired_tabs.clone());
+    for op in tab_ops {
+        match op {
+            GoTo(t) => {
+                let tab_id = current_tabs
+                    .get(&t)
+                    .expect("`tab` should exist in `current_tabs`")
+                    .id
+                    .expect("an item from `current_tabs` should have an `id`");
+                let match_str = format!("id:{}", tab_id);
+                let args = ["@", "focus-tab", "--match", match_str.as_str()];
+                Command::new("kitten").args(args).output()?;
+            }
+            Create(t) => {
+                let args = [
+                    "@",
+                    "launch",
+                    "--type",
+                    "tab",
+                    "--tab-title",
+                    &t.title,
+                    "--title",
+                    "TMPWINDOW",
+                ];
+                Command::new("kitten").args(args).output()?;
+                current_tabs = kittylitters::collect_windows()?;
+            }
+            Close => {
+                let args = ["@", "close-tab"];
+                Command::new("kitten").args(args).output()?;
+            }
+            MoveForward => {
+                let args = ["@", "action", "move_tab_forward"];
+                Command::new("kitten").args(args).output()?;
+            }
+        }
+    }
+
+    let mut current_tabs = kittylitters::collect_windows()?;
+
+    for current_tab in current_tabs.clone() {
+        let desired_tab = desired_tabs.get(&current_tab).expect(
+            "`desired_tabs` should have every `tab` from `current_tabs` since they should be \
+             aligned by now",
+        );
+        let current_windows = current_tab.clone().windows;
+        let desired_windows = desired_tab.clone().windows;
+
+        let window_ops = kittylitters::set_operations(current_windows.clone(), desired_windows);
+        for op in window_ops {
+            match op {
+                GoTo(w) => {
+                    let win_id = current_tabs
+                        .get(&current_tab)
+                        .expect("`current_tab` should exist in `current_tabtabs`")
+                        .windows
+                        .get(&w)
+                        .expect("`win` should exist in `current_windows`")
+                        .id
+                        .expect("an item from `current_windows` should have an `id`");
+                    let match_str = format!("id:{}", win_id);
+                    let args = ["@", "focus-window", "--match", match_str.as_str()];
+                    Command::new("kitten").args(args).output()?;
+                }
+                Create(w) => {
+                    let args = ["@", "launch", "--type", "window", "--title", &w.title];
+                    Command::new("kitten").args(args).output()?;
+                    current_tabs = kittylitters::collect_windows()?;
+                }
+                Close => {
+                    let args = ["@", "close-window"];
+                    Command::new("kitten").args(args).output()?;
+                }
+                MoveForward => {
+                    let args = ["@", "action", "move_window_forward"];
+                    Command::new("kitten").args(args).output()?;
+                }
+            }
+        }
+    }
 
     Command::new("kitten")
         .args(["@", "goto-layout", "--match", "all", "stack"])
