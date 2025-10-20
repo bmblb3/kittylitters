@@ -103,7 +103,16 @@ fn main() -> anyhow::Result<()> {
                     Command::new("kitten").args(args).output()?;
                 }
                 Create(w) => {
-                    let args = ["@", "launch", "--type", "window", "--title", &w.title];
+                    let args = [
+                        "@",
+                        "launch",
+                        "--type",
+                        "window",
+                        "--title",
+                        &w.title,
+                        "--cwd",
+                        &w.cwd.unwrap_or("~".to_string()),
+                    ];
                     Command::new("kitten").args(args).output()?;
                     current_tabs = collect_tabs_from_active_os_window();
                 }
