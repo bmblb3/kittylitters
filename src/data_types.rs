@@ -4,7 +4,7 @@ use indexmap::IndexSet;
 
 #[derive(Debug, Eq, Clone)]
 pub struct Tab {
-    pub id: Option<i64>,
+    pub id: Option<usize>,
     pub title: String,
     pub is_active: Option<bool>,
     pub windows: IndexSet<Window>,
@@ -22,7 +22,7 @@ impl PartialEq for Tab {
 
 #[derive(Debug, Eq, Clone)]
 pub struct Window {
-    pub id: Option<i64>,
+    pub id: Option<usize>,
     pub title: String,
     pub is_active: Option<bool>,
     pub cwd: Option<String>,

@@ -54,7 +54,7 @@ pub fn ls() -> anyhow::Result<IndexSet<Tab>> {
             .expect("`windows` should parse to an array");
 
         let mut existing_tab = Tab {
-            id: Some(tab_id),
+            id: Some(tab_id as usize),
             title: tab_title.to_string(),
             is_active: Some(tab_is_active),
             windows: IndexSet::new(),
@@ -80,7 +80,7 @@ pub fn ls() -> anyhow::Result<IndexSet<Tab>> {
                 .expect("`window[is_active]` should parse to a bool");
 
             let existing_window = Window {
-                id: Some(window_id),
+                id: Some(window_id as usize),
                 title: window_title.to_string(),
                 is_active: Some(window_is_active),
                 cmd: None,
