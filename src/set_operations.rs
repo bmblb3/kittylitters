@@ -12,7 +12,9 @@ where
 {
     let mut operations = Vec::new();
     loop {
-        if desired_set == current_set {
+        if desired_set.iter().eq(&current_set) {
+            dbg!(&desired_set);
+            dbg!(&current_set);
             break;
         }
 
@@ -197,6 +199,16 @@ mod tests {
             Operations::Create("D"), // [ A , D , B , C ]
             Operations::GoTo("C"),   // [ A , D , B ,"C"]
             Operations::Close,       // [ A , D , B ,   ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["D", "B", "C"],
+        &[
+            Operations::GoTo("A"),   // ["A",   , B , C ]
+            Operations::Create("D"), // [ A , D , B , C ]
+            Operations::GoTo("A"),   // ["A", D , B ,"C"]
+            Operations::Close,       // [   , D , B , C ]
         ]
     )]
     fn test_set_operations(
