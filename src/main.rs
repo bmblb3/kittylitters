@@ -17,8 +17,24 @@ fn main() -> color_eyre::Result<()> {
     // Command::new(editor).arg(&config_path).status()?;
 
     let desired_tabs = kittylitters::read_session_yml(&config_path)?;
-    let mut current_tabs = kittylitters::collect_windows()?;
+    let current_tabs = kittylitters::collect_windows()?;
 
+    let mut _active_tab = None;
+    let mut _active_window = None;
+    for tab in current_tabs.clone() {
+        if tab.is_active.is_some_and(|bool| bool) {
+            for window in &tab.windows {
+                if window.is_active.is_some_and(|bool| bool) {
+                    _active_tab = Some(tab.clone());
+                    _active_window = Some(window.clone());
+                    let args = ["@", "detach-window"];
+                    Command::new("kitten").args(args).output()?;
+                }
+            }
+        }
+    }
+
+    let mut current_tabs = kittylitters::collect_windows()?;
     let tab_ops = kittylitters::set_operations(current_tabs.clone(), desired_tabs.clone());
     for op in tab_ops {
         match op {
