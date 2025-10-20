@@ -2,6 +2,7 @@ use std::process::Command;
 
 use kittylitters::Operations::*;
 use kittylitters::OsWindow;
+use kittylitters::Tab;
 
 fn main() -> anyhow::Result<()> {
     let home_dir = std::env::var("HOME").expect(
@@ -35,14 +36,7 @@ fn main() -> anyhow::Result<()> {
     //     }
     // }
 
-    let os_windows = kittylitters::ls()?;
-    let init_active_os_window = os_windows
-        .iter()
-        .find(|ow| ow.is_active)
-        .expect("One of the OS windows should be active")
-        .clone();
-
-    let mut current_tabs = init_active_os_window.tabs.clone();
+    let mut current_tabs = collect_tabs_from_active_os_window();
 
     let tab_ops = kittylitters::set_operations(current_tabs.clone(), desired_tabs.clone());
     for op in tab_ops {
@@ -69,12 +63,7 @@ fn main() -> anyhow::Result<()> {
                     "TMPWINDOW",
                 ];
                 Command::new("kitten").args(args).output()?;
-                current_tabs = collect_os_window_from_id(init_active_os_window.id)
-                    .expect(
-                        "`init_active_os_window` was obtained from kitty ls, so it should index \
-                         into kitty ls",
-                    )
-                    .tabs;
+                current_tabs = collect_tabs_from_active_os_window();
             }
             Close => {
                 let args = ["@", "close-tab"];
@@ -87,11 +76,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    let mut current_tabs = collect_os_window_from_id(init_active_os_window.id)
-        .expect(
-            "`init_active_os_window` was obtained from kitty ls, so it should index into kitty ls",
-        )
-        .tabs;
+    let mut current_tabs = collect_tabs_from_active_os_window();
 
     for current_tab in current_tabs.clone() {
         let desired_tab = desired_tabs.get(&current_tab).expect(
@@ -120,12 +105,7 @@ fn main() -> anyhow::Result<()> {
                 Create(w) => {
                     let args = ["@", "launch", "--type", "window", "--title", &w.title];
                     Command::new("kitten").args(args).output()?;
-                    current_tabs = collect_os_window_from_id(init_active_os_window.id)
-                        .expect(
-                            "`init_active_os_window` was obtained from kitty ls, so it should \
-                             index into kitty ls",
-                        )
-                        .tabs;
+                    current_tabs = collect_tabs_from_active_os_window();
                 }
                 Close => {
                     let args = ["@", "close-window"];
@@ -146,10 +126,12 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn collect_os_window_from_id(id: usize) -> Option<OsWindow> {
+fn collect_tabs_from_active_os_window() -> indexmap::IndexSet<Tab> {
     kittylitters::ls()
         .expect("`kitty @ ls` should work")
         .iter()
-        .find(|ow| ow.id == id)
+        .find(|ow| ow.is_active)
         .cloned()
+        .expect("There must be exactly one active OS Window")
+        .tabs
 }
