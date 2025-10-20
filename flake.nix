@@ -1,5 +1,5 @@
 {
-  description = "devshell flake for rust packages";
+  description = "flake for rust development";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -23,18 +23,17 @@
           inherit system overlays;
         };
         rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+        cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
       in
       {
         packages = {
-          default = pkgs.rustPlatform.buildRustPackage rec {
-            pname = "kittylitters";
-            version = "0.2.1";
-            name = "${pname}-${version}";
-            src = ./.;
+          default = pkgs.pkgsStatic.rustPlatform.buildRustPackage {
+            pname = cargoToml.package.name;
+            version = cargoToml.package.version;
+            src = pkgs.lib.cleanSource ./.;
             cargoLock = {
               lockFile = ./Cargo.lock;
             };
-            nativeBuildInputs = [ rustToolchain ];
           };
         };
 
@@ -43,11 +42,10 @@
           mkShell {
             buildInputs = [
               bacon
-              cargo-audit
               cargo-nextest
               cargo-release
-              cargo-semver-checks
-              release-plz
+              git-cliff
+              just
               pre-commit
               ra-multiplex
               rustToolchain
