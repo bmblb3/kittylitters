@@ -2,6 +2,7 @@ pub mod kitty_ls;
 pub use kitty_ls::ls;
 
 pub mod data_types;
+pub use data_types::OsWindow;
 pub use data_types::Tab;
 pub use data_types::Window;
 
