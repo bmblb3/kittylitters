@@ -41,6 +41,12 @@ pub fn collect_windows() -> color_eyre::Result<IndexSet<Tab>> {
             .as_str()
             .expect("`tab[title]` should parse to an str");
 
+        let tab_is_active = tab
+            .get("is_active")
+            .expect("`tab` should have `is_active`")
+            .as_bool()
+            .expect("`tab[is_active]` should parse to a bool");
+
         let windows_array = tab
             .get("windows")
             .expect("`tabs` should contain `windows`")
@@ -50,6 +56,7 @@ pub fn collect_windows() -> color_eyre::Result<IndexSet<Tab>> {
         let mut existing_tab = Tab {
             id: Some(tab_id),
             title: tab_title.to_string(),
+            is_active: Some(tab_is_active),
             windows: IndexSet::new(),
         };
 
@@ -66,9 +73,16 @@ pub fn collect_windows() -> color_eyre::Result<IndexSet<Tab>> {
                 .as_i64()
                 .expect("`window[id]` should parse to an i64");
 
+            let window_is_active = window
+                .get("is_active")
+                .expect("`window` should have `is_active`")
+                .as_bool()
+                .expect("`window[is_active]` should parse to a bool");
+
             let existing_window = Window {
                 id: Some(window_id),
                 title: window_title.to_string(),
+                is_active: Some(window_is_active),
                 cmd: None,
                 cwd: None,
             };

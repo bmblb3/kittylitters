@@ -19,6 +19,7 @@ pub fn read_session_yml<P: AsRef<std::path::Path>>(path: P) -> color_eyre::Resul
             let mut desired_tab = Tab {
                 id: None,
                 title: tab_title.to_string(),
+                is_active: None,
                 windows: IndexSet::new(),
             };
 
@@ -38,6 +39,7 @@ pub fn read_session_yml<P: AsRef<std::path::Path>>(path: P) -> color_eyre::Resul
                         desired_tab.windows.insert(Window {
                             id: None,
                             title: window_title.to_string(),
+                            is_active: None,
                             cwd,
                             cmd,
                         });

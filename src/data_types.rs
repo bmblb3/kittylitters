@@ -6,6 +6,7 @@ use indexmap::IndexSet;
 pub struct Tab {
     pub id: Option<i64>,
     pub title: String,
+    pub is_active: Option<bool>,
     pub windows: IndexSet<Window>,
 }
 impl Hash for Tab {
@@ -23,6 +24,7 @@ impl PartialEq for Tab {
 pub struct Window {
     pub id: Option<i64>,
     pub title: String,
+    pub is_active: Option<bool>,
     pub cwd: Option<String>,
     pub cmd: Option<String>,
 }
@@ -48,11 +50,13 @@ mod tests {
         let tab1 = [Tab {
             id: Some(0),
             title: "A".to_string(),
+            is_active: Some(true),
             windows: IndexSet::new(),
         }];
         let tab2 = [Tab {
             id: None,
             title: "A".to_string(),
+            is_active: Some(false),
             windows: IndexSet::new(),
         }];
 
@@ -69,11 +73,13 @@ mod tests {
         let tab1 = [Tab {
             id: Some(0),
             title: "A".to_string(),
+            is_active: Some(true),
             windows: IndexSet::new(),
         }];
         let tab2 = [Tab {
             id: Some(0),
             title: "B".to_string(),
+            is_active: Some(true),
             windows: IndexSet::new(),
         }];
 
