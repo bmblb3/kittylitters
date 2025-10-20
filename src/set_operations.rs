@@ -11,7 +11,7 @@ where
     T: Eq + Hash + Copy + Debug,
 {
     let mut operations = Vec::new();
-    for _ in 1..5 {
+    loop {
         if desired_set == current_set {
             break;
         }
@@ -19,10 +19,12 @@ where
         let cs = current_set.clone();
         let mut current_iter = cs.iter();
         let mut desired_iter = desired_set.iter();
+        let mut latest_aligned = None;
 
-        for i in 0..5 {
+        loop {
             let this_item = current_iter.next().cloned();
             let target_item = desired_iter.next().cloned();
+            let mut this_operations = Vec::new();
 
             if this_item.is_none() && target_item.is_none() {
                 break;
@@ -32,38 +34,48 @@ where
                 && let Some(target_item) = &target_item
                 && &this_item == target_item
             {
+                latest_aligned = Some(this_item);
                 continue;
             }
 
             if let Some(target_item) = &target_item
                 && !&current_set.contains(target_item)
             {
-                operations.push(Operations::GoTo(get_prev_item(&current_set, i)));
-                operations.push(Operations::Create(*target_item));
-                current_set.shift_insert((i + 1).min(current_set.len()), *target_item);
+                let goto_item = if let Some(latest_aligned) = latest_aligned {
+                    latest_aligned
+                } else {
+                    *current_set
+                        .first()
+                        .expect("`current_set` should have a first element")
+                };
+                this_operations.push(Operations::GoTo(goto_item));
+                let this_index = current_set.get_index_of(&goto_item).expect(
+                    "`goto_item` should be present in `current_set` since it
+                 was picked from there",
+                );
+
+                this_operations.push(Operations::Create(*target_item));
+                current_set.shift_insert(this_index + 1, *target_item);
             }
 
             if let Some(this_item) = &this_item
                 && !&desired_set.contains(this_item)
             {
-                operations.push(Operations::GoTo(*this_item));
-                operations.push(Operations::Close);
-                current_set.shift_remove_index(i);
+                this_operations.push(Operations::GoTo(*this_item));
+                let this_index = current_set.get_index_of(this_item).expect(
+                    "`this_item` should be present in `current_set` since it was picked from there",
+                );
+
+                this_operations.push(Operations::Close);
+                current_set.shift_remove_index(this_index);
+            }
+
+            for op in this_operations {
+                operations.push(op);
             }
         }
     }
     operations
-}
-
-fn get_prev_item<T>(current_set: &IndexSet<T>, i: usize) -> T
-where
-    T: Copy,
-{
-    let prev_id = i.saturating_sub(1).min(current_set.len() - 1);
-    *current_set.get_index(prev_id).expect(
-        "`current_set` should be indexed by `prev_id`, which is is
-inside the index range",
-    )
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -175,6 +187,16 @@ mod tests {
             Operations::Create("D"), // [ A , D , B , C ]
             Operations::GoTo("B"),   // [ A , D ,"B", C ]
             Operations::Close,       // [ A , D ,   , C ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["A", "D", "B"],
+        &[
+            Operations::GoTo("A"),   // ["A",   , B , C ]
+            Operations::Create("D"), // [ A , D , B , C ]
+            Operations::GoTo("C"),   // [ A , D , B ,"C"]
+            Operations::Close,       // [ A , D , B ,   ]
         ]
     )]
     fn test_set_operations(
