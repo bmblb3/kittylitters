@@ -13,17 +13,17 @@ pub fn ls() -> anyhow::Result<IndexSet<Tab>> {
         .as_array()
         .expect("kitten @ ls should parse to array");
 
-    let focused_os_window = os_window_array
+    let active_os_window = os_window_array
         .iter()
         .find(|sess| {
-            sess.get("is_focused")
-                .is_some_and(|is_focused| is_focused.as_bool().is_some_and(|is_focused| is_focused))
+            sess.get("is_active")
+                .is_some_and(|is_active| is_active.as_bool().is_some_and(|is_active| is_active))
         })
-        .expect("A os_window should be focused");
+        .expect("A os_window should be active");
 
-    let tabs_array = focused_os_window
+    let tabs_array = active_os_window
         .get("tabs")
-        .expect("The focused os_window should have `tabs`")
+        .expect("The active os_window should have `tabs`")
         .as_array()
         .expect("`tabs` should parse to an array");
 
