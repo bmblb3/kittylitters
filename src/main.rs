@@ -17,7 +17,7 @@ fn main() -> color_eyre::Result<()> {
     // Command::new(editor).arg(&config_path).status()?;
 
     let desired_tabs = kittylitters::read_session_yml(&config_path)?;
-    let current_tabs = kittylitters::collect_windows()?;
+    let current_tabs = kittylitters::ls()?;
 
     let mut _active_tab = None;
     let mut _active_window = None;
@@ -34,7 +34,7 @@ fn main() -> color_eyre::Result<()> {
         }
     }
 
-    let mut current_tabs = kittylitters::collect_windows()?;
+    let mut current_tabs = kittylitters::ls()?;
     let tab_ops = kittylitters::set_operations(current_tabs.clone(), desired_tabs.clone());
     for op in tab_ops {
         match op {
@@ -60,7 +60,7 @@ fn main() -> color_eyre::Result<()> {
                     "TMPWINDOW",
                 ];
                 Command::new("kitten").args(args).output()?;
-                current_tabs = kittylitters::collect_windows()?;
+                current_tabs = kittylitters::ls()?;
             }
             Close => {
                 let args = ["@", "close-tab"];
@@ -73,7 +73,7 @@ fn main() -> color_eyre::Result<()> {
         }
     }
 
-    let mut current_tabs = kittylitters::collect_windows()?;
+    let mut current_tabs = kittylitters::ls()?;
 
     for current_tab in current_tabs.clone() {
         let desired_tab = desired_tabs.get(&current_tab).expect(
@@ -102,7 +102,7 @@ fn main() -> color_eyre::Result<()> {
                 Create(w) => {
                     let args = ["@", "launch", "--type", "window", "--title", &w.title];
                     Command::new("kitten").args(args).output()?;
-                    current_tabs = kittylitters::collect_windows()?;
+                    current_tabs = kittylitters::ls()?;
                 }
                 Close => {
                     let args = ["@", "close-window"];

@@ -5,7 +5,7 @@ use indexmap::IndexSet;
 use crate::Tab;
 use crate::Window;
 
-pub fn collect_windows() -> color_eyre::Result<IndexSet<Tab>> {
+pub fn ls() -> color_eyre::Result<IndexSet<Tab>> {
     let kitten_ls = serde_json::from_str::<serde_json::Value>(&String::from_utf8(
         Command::new("kitten").args(["@", "ls"]).output()?.stdout,
     )?)?;
