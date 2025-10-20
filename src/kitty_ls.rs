@@ -9,21 +9,21 @@ pub fn ls() -> color_eyre::Result<IndexSet<Tab>> {
     let kitten_ls = serde_json::from_str::<serde_json::Value>(&String::from_utf8(
         Command::new("kitten").args(["@", "ls"]).output()?.stdout,
     )?)?;
-    let session_array = kitten_ls
+    let os_window_array = kitten_ls
         .as_array()
         .expect("kitten @ ls should parse to array");
 
-    let focused_session = session_array
+    let focused_os_window = os_window_array
         .iter()
         .find(|sess| {
             sess.get("is_focused")
                 .is_some_and(|is_focused| is_focused.as_bool().is_some_and(|is_focused| is_focused))
         })
-        .expect("A session should be focused");
+        .expect("A os_window should be focused");
 
-    let tabs_array = focused_session
+    let tabs_array = focused_os_window
         .get("tabs")
-        .expect("The focused session should have `tabs`")
+        .expect("The focused os_window should have `tabs`")
         .as_array()
         .expect("`tabs` should parse to an array");
 
