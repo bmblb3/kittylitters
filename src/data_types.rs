@@ -3,6 +3,23 @@ use std::hash::Hash;
 use indexmap::IndexSet;
 
 #[derive(Debug, Eq, Clone)]
+pub struct OsWindow {
+    pub id: usize,
+    pub is_active: bool,
+    pub tabs: IndexSet<Tab>,
+}
+impl Hash for OsWindow {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
+}
+impl PartialEq for OsWindow {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+#[derive(Debug, Eq, Clone)]
 pub struct Tab {
     pub id: Option<usize>,
     pub title: String,
