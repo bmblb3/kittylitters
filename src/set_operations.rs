@@ -13,8 +13,6 @@ where
     let mut operations = Vec::new();
     loop {
         if desired_set.iter().eq(&current_set) {
-            dbg!(&desired_set);
-            dbg!(&current_set);
             break;
         }
 
