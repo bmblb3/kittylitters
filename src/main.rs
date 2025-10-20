@@ -1,7 +1,6 @@
 use std::process::Command;
 
 use kittylitters::Operations::*;
-use kittylitters::OsWindow;
 use kittylitters::Tab;
 
 fn main() -> anyhow::Result<()> {
@@ -103,16 +102,15 @@ fn main() -> anyhow::Result<()> {
                     Command::new("kitten").args(args).output()?;
                 }
                 Create(w) => {
-                    let args = [
-                        "@",
-                        "launch",
-                        "--type",
-                        "window",
-                        "--title",
-                        &w.title,
-                        "--cwd",
-                        &w.cwd.unwrap_or("~".to_string()),
+                    let mut args = vec![
+                        "@", "launch", "--type", "window", "--title", &w.title, "--hold",
                     ];
+                    if let Some(cwd) = &w.cwd {
+                        args.extend(["--cwd", cwd]);
+                    }
+                    if let Some(cmd) = &w.cmd {
+                        args.extend(cmd.iter().map(|s| s.as_str()));
+                    }
                     Command::new("kitten").args(args).output()?;
                     current_tabs = collect_tabs_from_active_os_window();
                 }

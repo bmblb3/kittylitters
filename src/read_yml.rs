@@ -32,9 +32,13 @@ pub fn read_session_yml<P: AsRef<std::path::Path>>(path: P) -> anyhow::Result<In
                         let cwd = window_instruction
                             .get("cwd")
                             .and_then(|val| val.as_str().map(|str| str.to_string()));
-                        let cmd = window_instruction
-                            .get("cmd")
-                            .and_then(|val| val.as_str().map(|str| str.to_string()));
+                        let cmd = window_instruction.get("cmd").and_then(|val| {
+                            val.as_sequence().map(|seq| {
+                                seq.iter()
+                                    .filter_map(|item| item.as_str().map(|s| s.to_string()))
+                                    .collect::<Vec<String>>()
+                            })
+                        });
 
                         desired_tab.windows.insert(Window {
                             id: None,

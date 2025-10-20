@@ -43,7 +43,7 @@ pub struct Window {
     pub title: String,
     pub is_active: Option<bool>,
     pub cwd: Option<String>,
-    pub cmd: Option<String>,
+    pub cmd: Option<Vec<String>>,
 }
 impl Hash for Window {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
