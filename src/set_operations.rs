@@ -30,11 +30,8 @@ where
                 break;
             }
 
-            if let Some(this_item) = this_item // TODO: refactor
-                && let Some(target_item) = &target_item
-                && &this_item == target_item
-            {
-                latest_aligned = Some(this_item);
+            if this_item == target_item {
+                latest_aligned = this_item;
                 continue;
             }
 
@@ -73,20 +70,11 @@ where
             }
 
             if let Some(target_item) = &target_item
+                && let Some(target_index) = current_set.get_index_of(target_item)
                 && let Some(this_item) = &this_item
+                && let Some(this_index) = current_set.get_index_of(this_item)
                 && current_set.contains(target_item)
             {
-                let this_index = current_set.get_index_of(this_item).expect(
-                    "`this_item` should be present in `current_set` since it
-            was picked from there",
-                );
-
-                let target_index = current_set.get_index_of(target_item).expect(
-                    // TODO: refacor with index in if let some(this_index)
-                    "`target_item` should be present in `current_set` since that is what this \
-                     branch guards",
-                );
-
                 for (i1, _) in (this_index..target_index).enumerate() {
                     for i2 in this_index..(target_index - i1) {
                         let goto_item = current_set.get_index(i2).expect(
