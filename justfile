@@ -56,7 +56,7 @@ upload:
     trap "rm -rf ${TMPDIR}" EXIT
     tar -czf "${TMPDIR}/${ASSET_NAME}.tar.gz" -C ./result/bin .
     (cd "${TMPDIR}" && sha256sum "${ASSET_NAME}.tar.gz" > "${ASSET_NAME}.tar.gz.sha256")
-    gh release upload "v${PACKAGE_VERSION}" "${TMPDIR}/${ASSET_NAME}.tar.gz" "${TMPDIR}/${ASSET_NAME}.tar.gz.sha256"
+    gh release create "v${PACKAGE_VERSION}" "${TMPDIR}/${ASSET_NAME}.tar.gz" "${TMPDIR}/${ASSET_NAME}.tar.gz.sha256" --notes "$(awk '/^## \[/{if(found) exit; found=1} found' CHANGELOG.md)"
 
 [group('release')]
 release: build tag upload
