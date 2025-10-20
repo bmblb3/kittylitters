@@ -291,6 +291,38 @@ mod tests {
             Operations::MoveForward, // [ C , B , A ]
         ]
     )]
+    #[case(
+        &["A"],
+        &["B", "A"],
+        &[
+            Operations::GoTo("A"),   // ["A",   ]
+            Operations::Create("B"), // [ A , B ]
+            Operations::GoTo("A"),   // ["A", B ]
+            Operations::MoveForward, // [ B ,"A"]
+        ]
+    )]
+    #[case(
+        &["A"],
+        &["C", "B", "A"],
+        &[
+            Operations::GoTo("A"),   // ["A",   ,   ]
+            Operations::Create("C"), // [ A , C ,   ]
+            Operations::GoTo("A"),   // ["A", C ,   ]
+            Operations::MoveForward, // [ C , A ,   ]
+            Operations::GoTo("C"),   // [ C ,"A",   ]
+            Operations::Create("B"), // [ C , B , A ]
+        ]
+    )]
+    #[case(
+        &["A", "B"],
+        &["B", "C", "A"],
+        &[
+            Operations::GoTo("A"),   // ["A", B ,   ]
+            Operations::MoveForward, // [ B , A ,   ]
+            Operations::GoTo("B"),   // ["B", A ,   ]
+            Operations::Create("C"), // [ B , C , A ]
+        ]
+    )]
     fn test_set_operations(
         #[case] current: &[&str],
         #[case] desired: &[&str],
