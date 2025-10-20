@@ -1,10 +1,11 @@
 mod run_operations;
 
+use std::process::Command;
+
 use kittylitters::collect_windows::collect_windows;
 use kittylitters::read_yml::read_session_yml;
 use kittylitters::set_logic::Solver;
 use kittylitters::windows::Window;
-use std::process::Command;
 
 fn main() -> color_eyre::Result<()> {
     let current_windows = collect_windows()?;
