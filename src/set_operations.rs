@@ -233,6 +233,64 @@ mod tests {
             Operations::MoveForward, // [ B , A ]
         ]
     )]
+    #[case(
+        &["A", "B", "C"],
+        &["A", "B", "C"],
+        &[
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["A", "C", "B"],
+        &[
+            Operations::GoTo("B"),   // [ A ,"B", C ]
+            Operations::MoveForward, // [ A , C , B ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["B", "A", "C"],
+        &[
+            Operations::GoTo("A"),   // ["A", B , C ]
+            Operations::MoveForward, // [ B , A , C ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["B", "C", "A"],
+        &[
+            Operations::GoTo("A"),   // ["A", B , C ]
+            Operations::MoveForward, // [ B , A , C ]
+            Operations::GoTo("A"),   // [ B ,"A", C ]
+            Operations::MoveForward, // [ B , C , A ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["C", "A", "B"],
+        &[
+            Operations::GoTo("A"),   // ["A", B , C ]
+            Operations::MoveForward, // [ B , A , C ]
+            Operations::GoTo("A"),   // [ B ,"A", C ]
+            Operations::MoveForward, // [ B , C , A ]
+            Operations::GoTo("B"),   // ["B", C , A ]
+            Operations::MoveForward, // [ C , B , A ]
+            Operations::GoTo("B"),   // [ C ,"B", A ]
+            Operations::MoveForward, // [ C , A , B ]
+        ]
+    )]
+    #[case(
+        &["A", "B", "C"],
+        &["C", "B", "A"],
+        &[
+            Operations::GoTo("A"),   // ["A", B , C ]
+            Operations::MoveForward, // [ B , A , C ]
+            Operations::GoTo("A"),   // [ B ,"A", C ]
+            Operations::MoveForward, // [ B , C , A ]
+            Operations::GoTo("B"),   // ["B", C , A ]
+            Operations::MoveForward, // [ C , B , A ]
+        ]
+    )]
     fn test_set_operations(
         #[case] current: &[&str],
         #[case] desired: &[&str],
