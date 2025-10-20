@@ -6,7 +6,7 @@ use indexmap::IndexSet;
 use crate::Tab;
 use crate::Window;
 
-pub fn read_session_yml<P: AsRef<std::path::Path>>(path: P) -> color_eyre::Result<IndexSet<Tab>> {
+pub fn read_session_yml<P: AsRef<std::path::Path>>(path: P) -> anyhow::Result<IndexSet<Tab>> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
 

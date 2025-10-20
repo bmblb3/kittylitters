@@ -2,7 +2,7 @@ use std::process::Command;
 
 use kittylitters::Operations::*;
 
-fn main() -> color_eyre::Result<()> {
+fn main() -> anyhow::Result<()> {
     let home_dir = std::env::var("HOME").expect(
         "HOME environment variable should
     // be set",
