@@ -1,4 +1,15 @@
-/target
-.envrc
+# [direnv]
 .direnv
+.envrc
+
+# [dotenv]
+.env
+
+# [nix]
 result
+
+# [rust]
+**/*.rs.bk
+# cargo.lock
+debug/
+target/
