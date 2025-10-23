@@ -44,7 +44,10 @@
               bacon
               cargo-nextest
               cargo-release
+              gh
               git-cliff
+              gnutar
+              jq
               just
               pre-commit
               ra-multiplex
